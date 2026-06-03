@@ -1,0 +1,46 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    "Daftar seluruh mata kuliah (courses)"
+    courses: [Course!]! @all
+
+    "Daftar seluruh mahasiswa"
+    students: [Student!]! @all
+
+    "Mencari mahasiswa berdasarkan ID (NIM)"
+    student(id: ID! @eq): Student @find
+
+    "Daftar seluruh draf KRS mahasiswa"
+    krsItems: [KrsItem!]! @all
+}
+
+type Course {
+    id: ID!
+    code: String!
+    name: String!
+    credits: Int!
+    quota: Int!
+    remaining_quota: Int!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Student {
+    id: ID!
+    name: String!
+    krsItems: [KrsItem!]! @hasMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type KrsItem {
+    id: ID!
+    student_id: String!
+    course_id: ID!
+    status: String!
+    student: Student! @belongsTo
+    course: Course! @belongsTo
+    created_at: DateTime!
+    updated_at: DateTime!
+}
