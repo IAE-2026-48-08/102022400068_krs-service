@@ -519,7 +519,8 @@
                 },
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "ApiKeyAuth": [],
+                        "BearerAuth": []
                     }
                 ]
             }
@@ -532,6 +533,12 @@
                 "description": "Header key for API authentication",
                 "name": "X-IAE-KEY",
                 "in": "header"
+            },
+            "BearerAuth": {
+                "type": "http",
+                "description": "Enter Bearer JWT token",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
             }
         }
     },

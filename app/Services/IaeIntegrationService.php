@@ -12,8 +12,8 @@ class IaeIntegrationService
 
     public function __construct()
     {
-        $this->baseUrl = env('IAE_SSO_URL', 'https://iae-sso.virtualfri.id');
-        $this->teamId = env('TEAM_ID', 'TEAM-01');
+        $this->baseUrl = config('services.iae.sso_url');
+        $this->teamId = config('services.iae.team_id');
     }
 
     // --- Translasi dari Postman: Tes SOAP Audit ---
@@ -47,17 +47,22 @@ class IaeIntegrationService
     // --- Translasi dari Postman: Tes RabbitMQ ---
     public function publishEvent($token, $payload)
     {
-        $response = Http::withToken($token)
-            ->post($this->baseUrl . '/api/v1/messages/publish', [
-                'exchange' => 'iae.central.exchange',
-                'routing_key' => 'krs.submitted.event',
-                'payload' => $payload
-            ]);
+        try {
+            $response = Http::withToken($token)
+                ->post($this->baseUrl . '/api/v1/messages/publish', [
+                    'exchange' => 'iae.central.exchange',
+                    'routing_key' => 'krs.submitted.event',
+                    'payload' => $payload
+                ]);
 
-        if (!$response->successful()) {
-            Log::error('RabbitMQ Error', ['response' => $response->body()]);
+            if (!$response->successful()) {
+                Log::error('RabbitMQ Error', ['response' => $response->body()]);
+            }
+            
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error('RabbitMQ Connection/Network Error', ['message' => $e->getMessage()]);
+            return false;
         }
-        
-        return $response->successful();
     }
 }

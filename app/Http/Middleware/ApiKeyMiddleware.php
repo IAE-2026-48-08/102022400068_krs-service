@@ -16,7 +16,7 @@ class ApiKeyMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $key = $request->header('X-IAE-KEY');
-        $expectedKey = env('IAE_KEY', 'secret_iae_key_123');
+        $expectedKey = config('services.iae.api_key');
 
         if (!$key || $key !== $expectedKey) {
             return response()->json([

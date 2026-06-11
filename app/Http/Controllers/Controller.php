@@ -20,6 +20,13 @@ use OpenApi\Attributes as OA;
     name: "X-IAE-KEY",
     description: "Header key for API authentication"
 )]
+#[OA\SecurityScheme(
+    securityScheme: "BearerAuth",
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT",
+    description: "Enter Bearer JWT token"
+)]
 abstract class Controller
 {
     //

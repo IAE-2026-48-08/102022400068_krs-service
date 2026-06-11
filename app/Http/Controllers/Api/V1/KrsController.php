@@ -237,7 +237,7 @@ class KrsController extends Controller
         path: "/v1/krs/submit",
         summary: "Submit a KRS transaction (register student to a course)",
         tags: ["KRS"],
-        security: [["ApiKeyAuth" => []]]
+        security: [["ApiKeyAuth" => [], "BearerAuth" => []]]
     )]
     #[OA\RequestBody(
         required: true,

@@ -20,7 +20,7 @@ class SsoJwtMiddleware
 
         try {
             // 1. Ambil JWKS (Public Key) dari Cloud Dosen
-            $jwksUrl = env('IAE_SSO_URL') . '/api/v1/auth/jwks';
+            $jwksUrl = config('services.iae.sso_url') . '/api/v1/auth/jwks';
             $jwksResponse = Http::get($jwksUrl);
             $jwks = $jwksResponse->json();
 
