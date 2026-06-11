@@ -15,9 +15,9 @@ Setelah menerima konfirmasi sukses dari hasil validasi status mahasiswa dan pras
  
 1. SERVICE DATA MAHASISWA (D Hans Dhika Slamet)
 Resource Name: students
- Collection:  GET /api/v1/students  (Mengambil seluruh daftar mahasiswa aktif untuk sinkronisasi data kuota awal semester).
-Resource:  GET /api/v1/students/{id}  (Mengambil detail profil statis mahasiswa seperti Nama, NIM, dan Status Aktif/Tidak untuk verifikasi identitas dasar).
-Action:  POST /api/v1/students/validate-quota  (Memproses validasi logika bisnis dengan menerima input jumlah SKS yang diajukan via request body, lalu menghitung kecukupan sisa kuota mahasiswa secara real-time untuk menentukan eligibility pengambilan KRS).
+Collection:  GET /api/v1/students (Mengambil seluruh daftar mahasiswa aktif untuk sinkronisasi data kuota awal semester).
+Resource:  GET /api/v1/students/{id} (Mengambil detail profil statis mahasiswa seperti Nama, NIM, dan Status Aktif/Tidak untuk verifikasi identitas dasar).
+Action:  POST /api/v1/students/validate-quota (Memproses validasi logika bisnis dengan menerima input jumlah SKS yang diajukan via request body, lalu menghitung kecukupan sisa kuota mahasiswa secara real-time untuk menentukan eligibility pengambilan KRS).
 
 2. SERVICE MATA KULIAH & KRS (Galih Hirpana)
 Resource Name: krs

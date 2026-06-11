@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\KrsItem;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use App\Services\IaeIntegrationService;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Attributes as OA;
 
@@ -341,109 +342,65 @@ class KrsController extends Controller
             type: "object"
         )
     )]
-    public function submit(Request $request)
+    public function submit(Request $request, IaeIntegrationService $integration)
     {
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|string|exists:students,id',
-            'course_id' => 'required|integer|exists:courses,id',
+        $request->validate([
+            'student_id' => 'required|string',
+            'course_id' => 'required|integer'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['message' => 'Token JWT tidak ditemukan'], 401);
         }
 
-        $studentId = $request->input('student_id');
-        $courseId = $request->input('course_id');
-
         try {
-            $result = DB::transaction(function () use ($studentId, $courseId) {
-                // Lock course row for update to prevent race conditions on quota check
-                $course = Course::lockForUpdate()->find($courseId);
-
-                // 1. Check if course is already taken by student
-                $existingItem = KrsItem::where('student_id', $studentId)
-                    ->where('course_id', $courseId)
-                    ->first();
-
-                if ($existingItem) {
-                    return [
-                        'success' => false,
-                        'status_code' => 400,
-                        'message' => 'Course already selected',
-                        'errors' => [
-                            'course_id' => ['The student has already registered for this course.']
-                        ]
-                    ];
+            // Mulai transaksi database
+            $krsItem = DB::transaction(function () use ($request, $integration, $token) {
+                
+                // 1. Ambil Course & kunci baris ini agar sisa_kuota aman dari race condition
+                $course = Course::where('id', $request->course_id)->lockForUpdate()->firstOrFail();
+                
+                if ($course->remaining_quota < 1) {
+                    throw new \Exception("Kuota penuh!");
                 }
 
-                // 2. Check if quota is available
-                if ($course->remaining_quota <= 0) {
-                    return [
-                        'success' => false,
-                        'status_code' => 400,
-                        'message' => 'Quota full',
-                        'errors' => [
-                            'course_id' => ['The quota for this course is full.']
-                        ]
-                    ];
-                }
-
-                // 3. Decrement quota and create transaction
+                // 2. Kurangi kuota & simpan transaksi
                 $course->decrement('remaining_quota');
-
-                $krsItem = KrsItem::create([
-                    'student_id' => $studentId,
-                    'course_id' => $courseId,
-                    'status' => 'submitted',
+                
+                $item = KrsItem::create([
+                    'student_id' => $request->student_id,
+                    'course_id' => $course->id,
+                    'status' => 'submitted'
                 ]);
 
-                return [
-                    'success' => true,
-                    'status_code' => 201,
-                    'data' => [
-                        'id' => $krsItem->id,
-                        'student_id' => $krsItem->student_id,
-                        'course' => [
-                            'id' => $course->id,
-                            'code' => $course->code,
-                            'name' => $course->name,
-                            'credits' => $course->credits,
-                            'remaining_quota' => $course->remaining_quota,
-                        ],
-                        'status' => $krsItem->status,
-                    ]
+                $transactionData = [
+                    'student_id' => $item->student_id,
+                    'course_id' => $item->course_id,
+                    'status' => 'submitted'
                 ];
-            });
 
-            if (!$result['success']) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $result['message'],
-                    'errors' => $result['errors']
-                ], $result['status_code']);
-            }
+                // 3. Panggil Legacy SOAP (Modul 2)
+                // Jika ini gagal, Exception akan dilempar dan database otomatis di-rollback
+                $integration->sendSoapAudit($token, $transactionData);
+                
+                // 4. Panggil AMQP Publisher untuk Service Kurikulum (Modul 3)
+                $integration->publishEvent($token, $transactionData);
+
+                return $item;
+            });
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'KRS submitted successfully',
-                'data' => $result['data'],
-                'meta' => [
-                    'timestamp' => now()->toIso8601String()
-                ]
+                'message' => 'KRS berhasil diajukan dan dicatat di sistem terpusat.',
+                'data' => $krsItem
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while submitting KRS.',
-                'errors' => [
-                    'server' => [$e->getMessage()]
-                ]
-            ], 500);
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 }
