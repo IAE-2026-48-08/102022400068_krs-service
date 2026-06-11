@@ -23,7 +23,7 @@ class IaeIntegrationService
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
            <soapenv:Body>
               <AuditRequest>
-                 <TeamID>' . $this->teamId . '</TeamID>
+                  <TeamID>TEAM-09</TeamID>
                  <ActivityName>KrsSubmitted</ActivityName>
                  <LogContent><![CDATA[' . json_encode($transactionData) . ']]></LogContent>
               </AuditRequest>
