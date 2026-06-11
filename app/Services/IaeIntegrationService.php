@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Log;
 class IaeIntegrationService
 {
     protected $baseUrl;
-    protected $teamId;
+    protected $teamId = 'TEAM-09';
 
     public function __construct()
     {
         $this->baseUrl = config('services.iae.sso_url');
-        $this->teamId = config('services.iae.team_id');
+        $this->teamId = config('services.iae.team_id', 'TEAM-09');
     }
 
     // --- Translasi dari Postman: Tes SOAP Audit ---
