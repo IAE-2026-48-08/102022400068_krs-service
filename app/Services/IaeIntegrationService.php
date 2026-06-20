@@ -65,4 +65,18 @@ class IaeIntegrationService
             return false;
         }
     }
+
+    /**
+     * Mengambil token M2M dari SSO Pusat dosen.
+     */
+    protected function getM2MToken()
+    {
+        $response = Http::post('https://iae-sso.virtualfri.id/api/v1/auth/token', [
+            'api_key' => env('IAE_API_KEY', 'KEY-MHS-156'),
+            'nim'     => '102022400068'
+        ]);
+
+        return $response->json()['token'] ?? null;
+    }
 }
+
