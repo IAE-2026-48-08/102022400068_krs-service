@@ -88,6 +88,94 @@ class KrsController extends Controller
     }
 
     #[OA\Get(
+        path: "/v1/krs",
+        summary: "Display a listing of all KRS records",
+        tags: ["KRS"],
+        security: [["ApiKeyAuth" => []]]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Successful operation",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "success"),
+                new OA\Property(property: "message", type: "string", example: "All KRS records retrieved successfully"),
+                new OA\Property(
+                    property: "data",
+                    type: "array",
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "student_id", type: "string", example: "102022400068"),
+                            new OA\Property(
+                                property: "student",
+                                properties: [
+                                    new OA\Property(property: "id", type: "string", example: "102022400068"),
+                                    new OA\Property(property: "name", type: "string", example: "Galih Pratama")
+                                ],
+                                type: "object"
+                            ),
+                            new OA\Property(
+                                property: "course",
+                                properties: [
+                                    new OA\Property(property: "id", type: "integer", example: 1),
+                                    new OA\Property(property: "code", type: "string", example: "IF-101"),
+                                    new OA\Property(property: "name", type: "string", example: "Pemrograman Dasar"),
+                                    new OA\Property(property: "credits", type: "integer", example: 3)
+                                ],
+                                type: "object"
+                            ),
+                            new OA\Property(property: "status", type: "string", example: "submitted"),
+                            new OA\Property(property: "created_at", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z"),
+                            new OA\Property(property: "updated_at", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z")
+                        ],
+                        type: "object"
+                    )
+                ),
+                new OA\Property(
+                    property: "meta",
+                    properties: [
+                        new OA\Property(property: "count", type: "integer", example: 5)
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Unauthorized",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Unauthorized access. X-IAE-KEY header is missing or invalid."),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "auth", type: "array", items: new OA\Items(type: "string", example: "Invalid API Key."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    public function index()
+    {
+        $krsItems = KrsItem::with(['student', 'course'])->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'All KRS records retrieved successfully',
+            'data' => $krsItems,
+            'meta' => [
+                'count' => $krsItems->count()
+            ]
+        ], 200);
+    }
+
+    #[OA\Get(
         path: "/v1/krs/{student_id}",
         summary: "Display the KRS draft items of a specific student",
         tags: ["KRS"],
@@ -344,14 +432,28 @@ class KrsController extends Controller
     )]
     public function submit(Request $request, IaeIntegrationService $integration)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'student_id' => 'required|string',
             'course_id' => 'required|integer'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         $token = $request->bearerToken();
         if (!$token) {
-            return response()->json(['message' => 'Token JWT tidak ditemukan'], 401);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token JWT tidak ditemukan',
+                'errors' => [
+                    'auth' => ['Bearer token is required.']
+                ]
+            ], 401);
         }
 
         try {
@@ -390,16 +492,28 @@ class KrsController extends Controller
                 return $item;
             });
 
+            $krsItem->load('course');
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'KRS berhasil diajukan dan dicatat di sistem terpusat.',
-                'data' => $krsItem
+                'data' => $krsItem,
+                'meta' => [
+                    'timestamp' => now()->toIso8601String()
+                ]
             ], 201);
 
         } catch (\Exception $e) {
+            $errorKey = 'transaction';
+            if ($e->getMessage() === 'Kuota penuh!') {
+                $errorKey = 'course_id';
+            }
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'errors' => [
+                    $errorKey => [$e->getMessage()]
+                ]
             ], 400);
         }
     }

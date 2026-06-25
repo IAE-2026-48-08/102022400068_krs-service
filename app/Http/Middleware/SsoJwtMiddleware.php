@@ -15,7 +15,13 @@ class SsoJwtMiddleware
     {
         $token = $request->bearerToken();
         if (!$token) {
-            return response()->json(['message' => 'Token tidak ditemukan'], 401);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token tidak ditemukan',
+                'errors' => [
+                    'auth' => ['Bearer token is required.']
+                ]
+            ], 401);
         }
 
         try {
@@ -33,7 +39,13 @@ class SsoJwtMiddleware
 
             return $next($request);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Token tidak valid: ' . $e->getMessage()], 401);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token tidak valid: ' . $e->getMessage(),
+                'errors' => [
+                    'auth' => ['Token decoding failed.']
+                ]
+            ], 401);
         }
     }
 }
