@@ -173,7 +173,7 @@
                                                             },
                                                             "name": {
                                                                 "type": "string",
-                                                                "example": "Galih Pratama"
+                                                                "example": "Galih Hirpana"
                                                             }
                                                         },
                                                         "type": "object"
@@ -316,7 +316,7 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Galih Pratama"
+                                                            "example": "Galih Hirpana"
                                                         }
                                                     },
                                                     "type": "object"

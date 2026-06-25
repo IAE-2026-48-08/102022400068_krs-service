@@ -17,7 +17,7 @@ class StudentSeeder extends Seeder
         $students = [
             [
                 'id' => '102022400068',
-                'name' => 'Galih Pratama',
+                'name' => 'Galih Hirpana',
             ],
             [
                 'id' => '102022400001',

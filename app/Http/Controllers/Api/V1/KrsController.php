@@ -111,7 +111,7 @@ class KrsController extends Controller
                                 property: "student",
                                 properties: [
                                     new OA\Property(property: "id", type: "string", example: "102022400068"),
-                                    new OA\Property(property: "name", type: "string", example: "Galih Pratama")
+                                    new OA\Property(property: "name", type: "string", example: "Galih Hirpana")
                                 ],
                                 type: "object"
                             ),
@@ -202,7 +202,7 @@ class KrsController extends Controller
                             property: "student",
                             properties: [
                                 new OA\Property(property: "id", type: "string", example: "102022400068"),
-                                new OA\Property(property: "name", type: "string", example: "Galih Pratama")
+                                new OA\Property(property: "name", type: "string", example: "Galih Hirpana")
                             ],
                             type: "object"
                         ),
