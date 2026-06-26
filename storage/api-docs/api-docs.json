@@ -7,18 +7,18 @@
     },
     "servers": [
         {
-            "url": "/api",
+            "url": "/",
             "description": "API Server"
         }
     ],
     "paths": {
-        "/v1/courses": {
+        "/api/v1/courses": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Display a listing of courses and their remaining quota",
-                "operationId": "371d9a18f115629527a67773ba85770a",
+                "operationId": "015d7bef15a06d8c996eebb34f27e9dd",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -135,7 +135,7 @@
                     "Courses"
                 ],
                 "summary": "Create a new course",
-                "operationId": "f9c9149342e68d10280e7846a9727543",
+                "operationId": "ec269f9d595aebcd3aa3c1957f30d011",
                 "responses": {
                     "201": {
                         "description": "Course created successfully",
@@ -171,13 +171,548 @@
                 ]
             }
         },
-        "/v1/courses/{id}": {
+        "/api/v1/krs": {
+            "get": {
+                "tags": [
+                    "KRS"
+                ],
+                "summary": "Display a listing of all KRS records",
+                "operationId": "cff291c628e258dcbca925f8836d0efc",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All KRS records retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "student_id": {
+                                                        "type": "string",
+                                                        "example": "102022400068"
+                                                    },
+                                                    "student": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "example": "102022400068"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Galih Hirpana"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "course": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "IF-101"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Pemrograman Dasar"
+                                                            },
+                                                            "credits": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "submitted"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-02T07:51:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-02T07:51:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access. X-IAE-KEY header is missing or invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "auth": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Invalid API Key."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/krs/{student_id}": {
+            "get": {
+                "tags": [
+                    "KRS"
+                ],
+                "summary": "Display the KRS draft items of a specific student",
+                "operationId": "3b3f3f75c2c802081743b54cfab52427",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "path",
+                        "description": "NIM / ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "102022400068"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KRS draft retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "student": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "example": "102022400068"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Galih Hirpana"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "course": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "code": {
+                                                                        "type": "string",
+                                                                        "example": "IF-101"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Pemrograman Dasar"
+                                                                    },
+                                                                    "credits": {
+                                                                        "type": "integer",
+                                                                        "example": 3
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "submitted"
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2026-06-02T07:51:00Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total_courses": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "total_credits": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access. X-IAE-KEY header is missing or invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "auth": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Invalid API Key."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Student not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student not found"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "student_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Student with the given ID does not exist."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/krs/submit": {
+            "post": {
+                "tags": [
+                    "KRS"
+                ],
+                "summary": "Submit a KRS transaction (register student to a course)",
+                "operationId": "761011d4cc00db48171baa9ee3208dfd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "student_id",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "student_id": {
+                                        "type": "string",
+                                        "example": "102022400068"
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "KRS submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KRS submitted successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "student_id": {
+                                                    "type": "string",
+                                                    "example": "102022400068"
+                                                },
+                                                "course": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "code": {
+                                                            "type": "string",
+                                                            "example": "IF-101"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Pemrograman Dasar"
+                                                        },
+                                                        "credits": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "remaining_quota": {
+                                                            "type": "integer",
+                                                            "example": 29
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "submitted"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "timestamp": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2026-06-02T07:51:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (Quota full or course already taken)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quota full"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The quota for this course is full."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access. X-IAE-KEY header is missing or invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "auth": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Invalid API Key."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation error"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "student_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The selected student id is invalid."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": [],
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/courses/{id}": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Get specific course",
-                "operationId": "462a04bf9d9abab0d302506801899159",
+                "operationId": "dc72484c484bc5130d07720edf808cee",
                 "parameters": [
                     {
                         "name": "id",
@@ -244,6 +779,10 @@
         {
             "name": "Courses",
             "description": "Courses"
+        },
+        {
+            "name": "KRS",
+            "description": "KRS"
         }
     ]
 }

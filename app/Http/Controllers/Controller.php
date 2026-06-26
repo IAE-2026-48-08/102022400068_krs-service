@@ -10,7 +10,7 @@ use OpenApi\Attributes as OA;
     description: "API documentation for the Course & KRS Registration Service"
 )]
 #[OA\Server(
-    url: "/api",
+    url: "/",
     description: "API Server"
 )]
 #[OA\SecurityScheme(

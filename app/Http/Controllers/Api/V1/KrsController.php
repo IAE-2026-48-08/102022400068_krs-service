@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 class KrsController extends Controller
 {
     #[OA\Get(
-        path: "/v1/courses",
+        path: "/api/v1/courses",
         summary: "Display a listing of courses and their remaining quota",
         tags: ["Courses"],
         security: [["ApiKeyAuth" => []]]
@@ -87,6 +87,80 @@ class KrsController extends Controller
         ], 200);
     }
 
+    #[OA\Get(
+        path: "/api/v1/krs",
+        summary: "Display a listing of all KRS records",
+        tags: ["KRS"],
+        security: [["ApiKeyAuth" => []]]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Successful operation",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "success"),
+                new OA\Property(property: "message", type: "string", example: "All KRS records retrieved successfully"),
+                new OA\Property(
+                    property: "data",
+                    type: "array",
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "student_id", type: "string", example: "102022400068"),
+                            new OA\Property(
+                                property: "student",
+                                properties: [
+                                    new OA\Property(property: "id", type: "string", example: "102022400068"),
+                                    new OA\Property(property: "name", type: "string", example: "Galih Hirpana")
+                                ],
+                                type: "object"
+                            ),
+                            new OA\Property(
+                                property: "course",
+                                properties: [
+                                    new OA\Property(property: "id", type: "integer", example: 1),
+                                    new OA\Property(property: "code", type: "string", example: "IF-101"),
+                                    new OA\Property(property: "name", type: "string", example: "Pemrograman Dasar"),
+                                    new OA\Property(property: "credits", type: "integer", example: 3)
+                                ],
+                                type: "object"
+                            ),
+                            new OA\Property(property: "status", type: "string", example: "submitted"),
+                            new OA\Property(property: "created_at", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z"),
+                            new OA\Property(property: "updated_at", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z")
+                        ],
+                        type: "object"
+                    )
+                ),
+                new OA\Property(
+                    property: "meta",
+                    properties: [
+                        new OA\Property(property: "count", type: "integer", example: 5)
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Unauthorized",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Unauthorized access. X-IAE-KEY header is missing or invalid."),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "auth", type: "array", items: new OA\Items(type: "string", example: "Invalid API Key."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
     public function index()
     {
         $krsItems = KrsItem::with(['student', 'course'])->get();
@@ -101,6 +175,110 @@ class KrsController extends Controller
         ], 200);
     }
 
+    #[OA\Get(
+        path: "/api/v1/krs/{student_id}",
+        summary: "Display the KRS draft items of a specific student",
+        tags: ["KRS"],
+        security: [["ApiKeyAuth" => []]]
+    )]
+    #[OA\Parameter(
+        name: "student_id",
+        in: "path",
+        description: "NIM / ID of the student",
+        required: true,
+        schema: new OA\Schema(type: "string", example: "102022400068")
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Successful operation",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "success"),
+                new OA\Property(property: "message", type: "string", example: "KRS draft retrieved successfully"),
+                new OA\Property(
+                    property: "data",
+                    properties: [
+                        new OA\Property(
+                            property: "student",
+                            properties: [
+                                new OA\Property(property: "id", type: "string", example: "102022400068"),
+                                new OA\Property(property: "name", type: "string", example: "Galih Hirpana")
+                            ],
+                            type: "object"
+                        ),
+                        new OA\Property(
+                            property: "items",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "id", type: "integer", example: 1),
+                                    new OA\Property(
+                                        property: "course",
+                                        properties: [
+                                            new OA\Property(property: "id", type: "integer", example: 1),
+                                            new OA\Property(property: "code", type: "string", example: "IF-101"),
+                                            new OA\Property(property: "name", type: "string", example: "Pemrograman Dasar"),
+                                            new OA\Property(property: "credits", type: "integer", example: 3)
+                                        ],
+                                        type: "object"
+                                    ),
+                                    new OA\Property(property: "status", type: "string", example: "submitted"),
+                                    new OA\Property(property: "created_at", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z")
+                                ],
+                                type: "object"
+                            )
+                        )
+                    ],
+                    type: "object"
+                ),
+                new OA\Property(
+                    property: "meta",
+                    properties: [
+                        new OA\Property(property: "total_courses", type: "integer", example: 1),
+                        new OA\Property(property: "total_credits", type: "integer", example: 3)
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Unauthorized",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Unauthorized access. X-IAE-KEY header is missing or invalid."),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "auth", type: "array", items: new OA\Items(type: "string", example: "Invalid API Key."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Student not found",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Student not found"),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "student_id", type: "array", items: new OA\Items(type: "string", example: "Student with the given ID does not exist."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
     public function krs($student_id)
     {
         $student = Student::find($student_id);
@@ -143,6 +321,115 @@ class KrsController extends Controller
         ], 200);
     }
 
+    #[OA\Post(
+        path: "/api/v1/krs/submit",
+        summary: "Submit a KRS transaction (register student to a course)",
+        tags: ["KRS"],
+        security: [["ApiKeyAuth" => [], "BearerAuth" => []]]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ["student_id", "course_id"],
+            properties: [
+                new OA\Property(property: "student_id", type: "string", example: "102022400068"),
+                new OA\Property(property: "course_id", type: "integer", example: 1)
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: "KRS submitted successfully",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "success"),
+                new OA\Property(property: "message", type: "string", example: "KRS submitted successfully"),
+                new OA\Property(
+                    property: "data",
+                    properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "student_id", type: "string", example: "102022400068"),
+                        new OA\Property(
+                            property: "course",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "code", type: "string", example: "IF-101"),
+                                new OA\Property(property: "name", type: "string", example: "Pemrograman Dasar"),
+                                new OA\Property(property: "credits", type: "integer", example: 3),
+                                new OA\Property(property: "remaining_quota", type: "integer", example: 29)
+                            ],
+                            type: "object"
+                        ),
+                        new OA\Property(property: "status", type: "string", example: "submitted")
+                    ],
+                    type: "object"
+                ),
+                new OA\Property(
+                    property: "meta",
+                    properties: [
+                        new OA\Property(property: "timestamp", type: "string", format: "date-time", example: "2026-06-02T07:51:00Z")
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Bad Request (Quota full or course already taken)",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Quota full"),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "course_id", type: "array", items: new OA\Items(type: "string", example: "The quota for this course is full."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: "Unauthorized",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Unauthorized access. X-IAE-KEY header is missing or invalid."),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "auth", type: "array", items: new OA\Items(type: "string", example: "Invalid API Key."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
+    #[OA\Response(
+        response: 422,
+        description: "Validation error",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string", example: "error"),
+                new OA\Property(property: "message", type: "string", example: "Validation error"),
+                new OA\Property(
+                    property: "errors",
+                    properties: [
+                        new OA\Property(property: "student_id", type: "array", items: new OA\Items(type: "string", example: "The selected student id is invalid."))
+                    ],
+                    type: "object"
+                )
+            ],
+            type: "object"
+        )
+    )]
     public function submit(Request $request, IaeIntegrationService $integration)
     {
         $validator = Validator::make($request->all(), [
@@ -232,7 +519,7 @@ class KrsController extends Controller
     }
 
     #[OA\Get(
-        path: "/v1/courses/{id}",
+        path: "/api/v1/courses/{id}",
         summary: "Get specific course",
         tags: ["Courses"],
         security: [["ApiKeyAuth" => []]]
@@ -268,7 +555,7 @@ class KrsController extends Controller
     }
 
     #[OA\Post(
-        path: "/v1/courses",
+        path: "/api/v1/courses",
         summary: "Create a new course",
         tags: ["Courses"],
         security: [["ApiKeyAuth" => []]]
