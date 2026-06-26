@@ -42,4 +42,26 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 404);
             }
         });
+
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->is('api/*')) {
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Validation error',
+                        'errors' => $e->errors()
+                    ], 422);
+                }
+
+                $statusCode = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface ? $e->getStatusCode() : 500;
+                
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage() ?: 'Internal Server Error',
+                    'errors' => [
+                        'exception' => [$e->getMessage() ?: 'An unexpected error occurred.']
+                    ]
+                ], $statusCode);
+            }
+        });
     })->create();
